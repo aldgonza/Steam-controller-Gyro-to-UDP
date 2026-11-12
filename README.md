@@ -4,11 +4,7 @@
 
 Use a **2026 Steam Controller's gyro as cockpit head tracking** through [OpenTrack](https://github.com/opentrack/opentrack). Turn and tilt the controller to look around while keeping your regular flight controls in Steam Input.
 
-Originally built for **Nuclear Option** on Windows. User-reported working with a 2026 Steam Controller and OpenTrack. Other games that accept OpenTrack's TrackIR output may work, but have not been tested by this project.
-
 **Controller > this bridge > localhost UDP > OpenTrack > game's head-tracking camera**
-
-This is an early prototype developed with AI assistance. It needs no game DLLs, drivers or administrator privileges.
 
 ## Download
 
