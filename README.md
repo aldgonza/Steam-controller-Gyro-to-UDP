@@ -1,7 +1,5 @@
 # Gyro to UDP
 
-**Version 0.4.0:** configurable keyboard shortcuts with press-to-bind capture and Escape cancellation. The keyboard-only update has been tested successfully by the user.
-
 Use a **2026 Steam Controller's gyro as cockpit head tracking** through [OpenTrack](https://github.com/opentrack/opentrack). Turn and tilt the controller to look around while keeping your regular flight controls in Steam Input.
 
 **Controller > this bridge > localhost UDP > OpenTrack > game's head-tracking camera**
