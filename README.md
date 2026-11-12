@@ -1,5 +1,7 @@
 # Gyro to UDP
 
+**Development preview:** keyboard-only mapping, pending user testing before merge to main. The stable main branch remains v0.3.0.
+
 Use a **2026 Steam Controller's gyro as cockpit head tracking** through [OpenTrack](https://github.com/opentrack/opentrack). Turn and tilt the controller to look around while keeping your regular flight controls in Steam Input.
 
 Originally built for **Nuclear Option** on Windows. User-reported working with a 2026 Steam Controller and OpenTrack. Other games that accept OpenTrack's TrackIR output may work, but have not been tested by this project.
@@ -59,9 +61,15 @@ The bridge uses the game's existing head-tracking interface. It does not hook Un
 | **F8** | Center the view at the current controller orientation |
 | **F9** | Toggle pause; motion made while paused is discarded |
 | **F10** | Recalibrate sensor bias and center |
-| **Hold R3** | Pause while held; release to continue without a jump from the discarded motion |
+| **Hold to pause: None** | Assign a keyboard key to use as a clutch |
 
-Bindings are configured in **`settings.xml` beside the EXE**. Close the app before editing, then restart to load the changes. Run and close the app once to create this file, or copy `settings.example.xml` to `settings.xml` while the app is closed. The app has no key-capture editor or controller remapping dropdown.
+Click **Keyboard shortcuts...**, then click the shortcut beside the action you want to change. The capture prompt says **Press the keybind or Escape to cancel**. Press a key, optionally with Ctrl, Alt and/or Shift. Escape cancels just that capture and keeps the previous shortcut. Clear disables an action; Defaults restores F8/F9/F10 with no hold shortcut. Click Save to apply all changes and save them to `settings.xml`; Cancel discards the dialog's changes.
+
+While the mapper is open, camera motion is held and action shortcuts are suspended so the key you are assigning cannot trigger an action. Capture uses keyboard messages delivered to its focused window, without a keyboard hook or reflection. Duplicate shortcuts are rejected. Escape is reserved for cancellation, so it cannot be assigned.
+
+There are **no direct controller-button bindings**, including in the config. To use a Steam Controller paddle, assign it to your chosen keyboard shortcut in Steam Input. For example, bind Hold to pause to F7 here, then map a paddle to F7 in Steam. Keep the key held for as long as the paddle is held; use a normal press rather than a toggle/turbo binding.
+
+You can also edit **`settings.xml` beside the EXE** while the app is closed, then restart. Run and close the app once to create the file, or copy `settings.example.xml` to `settings.xml` while the app is closed.
 
 For example, inside the existing `<Settings>` element:
 
@@ -69,26 +77,10 @@ For example, inside the existing `<Settings>` element:
 <CenterKey>F8</CenterKey>
 <PauseKey>Ctrl+F9</PauseKey>
 <CalibrateKey>F10</CalibrateKey>
-<PauseButton>1</PauseButton>
-<CenterPad>2</CenterPad>
-<TogglePausePad>0</TogglePausePad>
-<CalibratePad>0</CalibratePad>
+<HoldPauseKey>F7</HoldPauseKey>
 ```
 
-`CenterKey`, `PauseKey` and `CalibrateKey` accept Windows key names such as `F8`, `F13` or `K`, optionally combined with `Ctrl`, `Alt` and/or `Shift` (for example `Ctrl+Alt+K`). Use `None` or `0` to disable a shortcut. Numeric keyboard values from previous versions remain supported. Invalid shortcuts are disabled; the window shows a notice when they are loaded. Malformed XML falls back to defaults and is preserved rather than overwritten.
-
-Controller fields use these values:
-
-| Value | Physical button |
-|---|---|
-| `0` | None |
-| `1` | R3 / right stick click |
-| `2` | L4 |
-| `3` | L5 |
-| `4` | R4 |
-| `5` | R5 |
-
-`PauseButton` is **hold to pause**; `CenterPad`, `TogglePausePad` and `CalibratePad` perform their named action on a button press. Choose different buttons/shortcuts for different actions to avoid conflicts. These are raw physical buttons, independent of Steam remapping; they keep their normal Steam/game actions.
+`CenterKey`, `PauseKey`, `CalibrateKey` and `HoldPauseKey` accept Windows key names such as `F8`, `F13` or `K`, optionally combined with `Ctrl`, `Alt` and/or `Shift` (for example `Ctrl+Alt+K`). Use `None` or `0` to disable a shortcut. Numeric keyboard values from previous versions remain supported. Old controller-binding XML fields are ignored and disappear when settings are saved. Invalid shortcuts are disabled; the window shows a notice when they are loaded. Malformed XML falls back to defaults and is preserved rather than overwritten.
 
 Keyboard shortcuts require the exact modifiers: Ctrl+F8 does not also trigger an F8 binding. The app polls the configured shortcuts while open; avoid conflicts with the game and OpenTrack. No keystrokes are recorded.
 

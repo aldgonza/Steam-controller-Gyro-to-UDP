@@ -51,8 +51,7 @@ public struct Quaternion {
 }
 public sealed class MotionEngine {
     public readonly object Gate=new object();
-    public bool Paused, Calibrating=true, Ready; public uint PauseMask=0x20;
-    public uint RecenterMask,TogglePauseMask,CalibrateMask; uint previousButtons;
+    public bool Paused, HoldPaused, Calibrating=true, Ready;
     public string CalibrationStatus="Waiting for motion; then keep controller still for 2 seconds.";
     public double BiasX,BiasY,BiasZ; public long SampleCount; public uint Buttons;
     public double LastSampleSeconds; public double Rate;
@@ -61,11 +60,9 @@ public sealed class MotionEngine {
     Stopwatch clock=Stopwatch.StartNew(); long rateCount; double rateTime;
     public void Recenter() { lock(Gate) { orientation=Quaternion.Identity; } }
     public void Calibrate() { lock(Gate) { Calibrating=true; Ready=false; calibration.Clear(); calibrationTime=0; orientation=Quaternion.Identity; CalibrationStatus="Keep controller still for 2 seconds."; } }
-    public void Disconnected() { lock(Gate) { haveTick=false; Buttons=previousButtons=0;Rate=0; Ready=false; Calibrating=true; calibration.Clear(); calibrationTime=0; orientation=Quaternion.Identity; } }
+    public void Disconnected() { lock(Gate) { haveTick=false; Buttons=0;Rate=0; Ready=false; Calibrating=true; calibration.Clear(); calibrationTime=0; orientation=Quaternion.Identity; } }
     public void Update(Sample s) { lock(Gate) {
         Buttons=s.Buttons;
-        uint pressed=s.Buttons&~previousButtons;previousButtons=s.Buttons;
-        if((pressed&RecenterMask)!=0)Recenter();if((pressed&TogglePauseMask)!=0)Paused=!Paused;if((pressed&CalibrateMask)!=0)Calibrate();
         if(haveTick && s.Tick==tick && s.TickBits==tickBits) return;
         double now=clock.Elapsed.TotalSeconds; LastSampleSeconds=now; SampleCount++; rateCount++;
         if(now-rateTime>=1) { Rate=rateCount/(now-rateTime); rateCount=0; rateTime=now; }
@@ -90,7 +87,7 @@ public sealed class MotionEngine {
             BiasX=x;BiasY=y;BiasZ=z;Calibrating=false;Ready=true;calibration.Clear();orientation=Quaternion.Identity;
             CalibrationStatus="Calibrated. Use the configured shortcuts or on-screen buttons."; return;
         }
-        if(Paused || (PauseMask!=0 && (s.Buttons&PauseMask)!=0)) return;
+        if(Paused || HoldPaused) return;
         orientation=(orientation*Quaternion.Increment(s.X-BiasX,s.Y-BiasY,s.Z-BiasZ,dt)).Normalized();
     }}
     public double Age { get { return clock.Elapsed.TotalSeconds-LastSampleSeconds; } }

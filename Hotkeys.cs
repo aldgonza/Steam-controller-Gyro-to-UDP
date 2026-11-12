@@ -6,8 +6,6 @@ using System.Windows.Forms;
 namespace SteamGyroOpenTrack {
 public static class Hotkeys {
     [DllImport("user32.dll")] static extern short GetAsyncKeyState(int key);
-    public static readonly uint[] ButtonMasks={0,0x20,0x20000,0x40000,0x80,0x100};
-    public static uint Mask(int index) {return index>=0&&index<ButtonMasks.Length?ButtonMasks[index]:0;}
     public static string Label(int value) {return value==0?"None":new KeysConverter().ConvertToInvariantString((Keys)value);}
     public static bool TryParse(string text,out int value) {
         value=0;

@@ -11,9 +11,8 @@ using System.Xml.Serialization;
 namespace SteamGyroOpenTrack {
 public sealed class Settings {
     public int Port=4242; public decimal YawGain=1,PitchGain=1; public bool Roll,InvertYaw,InvertPitch,EnableSensor=true;
-    public int PauseButton=1;
     public string CenterKey="F8",PauseKey="F9",CalibrateKey="F10";
-    public int CenterPad,TogglePausePad,CalibratePad;
+    public string HoldPauseKey="None";
 }
 public sealed class MainWindow : Form {
     readonly MotionEngine engine=new MotionEngine(); HidWorker worker; UdpClient sender;
@@ -21,8 +20,8 @@ public sealed class MainWindow : Form {
     readonly NumericUpDown port=new NumericUpDown(),yaw=new NumericUpDown(),pitch=new NumericUpDown();
     readonly CheckBox roll=new CheckBox(),invertYaw=new CheckBox(),invertPitch=new CheckBox(),enableSensor=new CheckBox();
     readonly Button start=new Button(),pause=new Button(),center=new Button(),calibrate=new Button();
-    readonly Timer timer=new Timer(); bool running,oldF8,oldF9,oldF10,settingsLoadFailed; DateTime demoEnd=DateTime.MinValue;
-    int centerKey,pauseKey,calibrateKey;
+    readonly Timer timer=new Timer(); bool running,oldF8,oldF9,oldF10,settingsLoadFailed,editingBindings; DateTime demoEnd=DateTime.MinValue;
+    int centerKey,pauseKey,calibrateKey,holdPauseKey;
     string settingsPath=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"settings.xml");
     Settings settings=new Settings();
     public MainWindow() {
@@ -31,9 +30,9 @@ public sealed class MainWindow : Form {
         AutoScaleMode=AutoScaleMode.Dpi;
         string configWarning="";
         try {if(File.Exists(settingsPath)) using(var f=File.OpenRead(settingsPath)) settings=(Settings)new XmlSerializer(typeof(Settings)).Deserialize(f);} catch {settings=new Settings();settingsLoadFailed=true;configWarning="Could not read settings.xml. Using defaults; existing file will be preserved.";}
-        if(!Hotkeys.TryParse(settings.CenterKey,out centerKey)||!Hotkeys.TryParse(settings.PauseKey,out pauseKey)||!Hotkeys.TryParse(settings.CalibrateKey,out calibrateKey)) {
+        if(!Hotkeys.TryParse(settings.CenterKey,out centerKey)||!Hotkeys.TryParse(settings.PauseKey,out pauseKey)||!Hotkeys.TryParse(settings.CalibrateKey,out calibrateKey)||!Hotkeys.TryParse(settings.HoldPauseKey,out holdPauseKey)) {
             configWarning="Invalid shortcut in settings.xml. Unrecognized shortcuts are disabled.";
-            Hotkeys.TryParse(settings.CenterKey,out centerKey);Hotkeys.TryParse(settings.PauseKey,out pauseKey);Hotkeys.TryParse(settings.CalibrateKey,out calibrateKey);
+            LoadBindings();
         }
         AddLabel("Steam Controller (2026) | wired USB or receiver | Windows x64",24,55,600,25,10,false);
         AddLabel("OpenTrack UDP port",24,102,180,28,10,false);
@@ -44,7 +43,8 @@ public sealed class MainWindow : Form {
         invertYaw.Text="Invert yaw";invertYaw.SetBounds(24,190,145,28);invertYaw.Checked=settings.InvertYaw;Controls.Add(invertYaw);
         invertPitch.Text="Invert pitch";invertPitch.SetBounds(184,190,145,28);invertPitch.Checked=settings.InvertPitch;Controls.Add(invertPitch);
         roll.Text="Send roll";roll.SetBounds(350,190,145,28);roll.Checked=settings.Roll;Controls.Add(roll);
-        AddLabel("Bindings: edit settings.xml with the app closed, then restart.",24,235,600,28,10,false);
+        var keyboard=new Button {Text="Keyboard shortcuts..."};keyboard.SetBounds(24,232,200,34);keyboard.Click+=(s,e)=>EditKeyboardBindings();Controls.Add(keyboard);
+        AddLabel("Map a Steam paddle to the same key.",240,237,386,28,10,false);
         enableSensor.Text="Request raw motion from controller (transient IMU setting)";
         enableSensor.SetBounds(24,278,600,30);enableSensor.Checked=settings.EnableSensor;Controls.Add(enableSensor);
         start.Text="Start bridge";start.SetBounds(24,322,143,36);start.Click+=(s,e)=>Toggle();Controls.Add(start);
@@ -68,9 +68,36 @@ public sealed class MainWindow : Form {
         catch(Exception ex) {Stop();status.Text=ex.Message;}
     }
     void Stop() {running=false;demoEnd=DateTime.MinValue;if(worker!=null){worker.Dispose();worker=null;}if(sender!=null){sender.Close();sender=null;}engine.Disconnected();start.Text="Start bridge";port.Enabled=true;status.Text="Stopped. OpenTrack will hold its last received pose.";}
+    void LoadBindings() {
+        Hotkeys.TryParse(settings.CenterKey,out centerKey);Hotkeys.TryParse(settings.PauseKey,out pauseKey);
+        Hotkeys.TryParse(settings.CalibrateKey,out calibrateKey);Hotkeys.TryParse(settings.HoldPauseKey,out holdPauseKey);
+    }
+    void EditKeyboardBindings() {
+        editingBindings=true;lock(engine.Gate)engine.HoldPaused=true;
+        try {
+            using(var dialog=new KeyboardMapperDialog(new int[]{centerKey,pauseKey,calibrateKey,holdPauseKey})) {
+                if(dialog.ShowDialog(this)!=DialogResult.OK)return;
+                int[] chosen=dialog.Bindings;
+                string[] previous={settings.CenterKey,settings.PauseKey,settings.CalibrateKey,settings.HoldPauseKey};
+                settings.CenterKey=Hotkeys.Label(chosen[0]);settings.PauseKey=Hotkeys.Label(chosen[1]);
+                settings.CalibrateKey=Hotkeys.Label(chosen[2]);settings.HoldPauseKey=Hotkeys.Label(chosen[3]);
+                if(!SaveSettings()) {
+                    settings.CenterKey=previous[0];settings.PauseKey=previous[1];settings.CalibrateKey=previous[2];settings.HoldPauseKey=previous[3];
+                    MessageBox.Show(this,"Could not save settings.xml. Check that the folder is writable and the existing XML is valid. Your previous shortcuts are still active.","Shortcuts not saved");return;
+                }
+                LoadBindings();
+                center.Text="Center\n"+Hotkeys.Label(centerKey);calibrate.Text="Calibrate\n"+Hotkeys.Label(calibrateKey);
+            }
+        }finally{
+            // A key used to finish capture must be released before it can trigger an action.
+            oldF8=Hotkeys.Down(centerKey);oldF9=Hotkeys.Down(pauseKey);oldF10=Hotkeys.Down(calibrateKey);
+            lock(engine.Gate)engine.HoldPaused=Hotkeys.Down(holdPauseKey);
+            editingBindings=false;
+        }
+    }
     void TickBridge() {
-        if(Hotkeys.Pressed(centerKey,ref oldF8))engine.Recenter();if(Hotkeys.Pressed(pauseKey,ref oldF9))TogglePause();if(Hotkeys.Pressed(calibrateKey,ref oldF10))engine.Calibrate();
-        lock(engine.Gate) {engine.PauseMask=Hotkeys.Mask(settings.PauseButton);engine.RecenterMask=Hotkeys.Mask(settings.CenterPad);engine.TogglePauseMask=Hotkeys.Mask(settings.TogglePausePad);engine.CalibrateMask=Hotkeys.Mask(settings.CalibratePad);}
+        if(!editingBindings){if(Hotkeys.Pressed(centerKey,ref oldF8))engine.Recenter();if(Hotkeys.Pressed(pauseKey,ref oldF9))TogglePause();if(Hotkeys.Pressed(calibrateKey,ref oldF10))engine.Calibrate();}
+        lock(engine.Gate)engine.HoldPaused=editingBindings||Hotkeys.Down(holdPauseKey);
         pause.Text=(engine.Paused?"Resume\n":"Pause\n")+Hotkeys.Label(pauseKey);
         if(!running)return;
         worker.EnableSensor=enableSensor.Checked;
@@ -80,9 +107,9 @@ public sealed class MainWindow : Form {
         else lock(engine.Gate) {
             if(!engine.Ready)status.Text=worker.Status+"\n"+engine.CalibrationStatus;
             else if(engine.Age>0.5)status.Text="Motion timestamps stalled. Check Steam's gyro setting or reconnect controller.";
-            else if(engine.Paused || (engine.PauseMask!=0&&(engine.Buttons&engine.PauseMask)!=0))status.Text="Paused: release the hold button, or use your toggle-pause binding.";
+            else if(engine.Paused || engine.HoldPaused)status.Text="Paused: release the hold shortcut, or use your toggle-pause shortcut.";
             else status.Text=worker.Status+"\nCalibrated.";
-            values.Text=String.Format("Yaw {0,6:0.0}°  Pitch {1,6:0.0}°  {2:0} Hz  Buttons {3:X8}",pose[3],pose[4],engine.Rate,engine.Buttons);
+            values.Text=String.Format("Yaw {0,6:0.0}°  Pitch {1,6:0.0}°  {2:0} Hz",pose[3],pose[4],engine.Rate);
         }
         try {var packet=MotionEngine.Packet(pose);sender.Send(packet,packet.Length);} catch(SocketException) {status.Text="UDP receiver unavailable. Start OpenTrack with the matching port.";}
     }
@@ -90,17 +117,18 @@ public sealed class MainWindow : Form {
         timer.Stop();Stop();
         SaveSettings();
     }
-    void SaveSettings() {
-        if(settingsLoadFailed)return;
+    bool SaveSettings() {
+        if(settingsLoadFailed)return false;
         try {settings.Port=(int)port.Value;settings.YawGain=yaw.Value;settings.PitchGain=pitch.Value;settings.Roll=roll.Checked;settings.InvertYaw=invertYaw.Checked;settings.InvertPitch=invertPitch.Checked;settings.EnableSensor=enableSensor.Checked;
             using(var f=File.Create(settingsPath))new XmlSerializer(typeof(Settings)).Serialize(f,settings);
-        } catch { /* Portable app can run from a read-only location. */ }
+            return true;
+        } catch {return false;}
     }
 }
 public static class Program {
     [STAThread] public static int Main(string[] args) {
         string folder=AppDomain.CurrentDomain.BaseDirectory;
-        if(args.Length>0 && args[0]=="--self-test") {try {Tests.Run();File.WriteAllText(Path.Combine(folder,"self-test.txt"),"PASS: motion/packet tests; config shortcut parsing; controller actions; settings persistence and legacy migration. Network delivery is a separate --udp-test.\r\n");return 0;}catch(Exception ex){File.WriteAllText(Path.Combine(folder,"self-test.txt"),ex.ToString());return 1;}}
+        if(args.Length>0 && args[0]=="--self-test") {try {Tests.Run();File.WriteAllText(Path.Combine(folder,"self-test.txt"),"PASS: motion/packet tests; keyboard capture and Escape cancellation; shortcut conflicts; keyboard hold pause; settings persistence and legacy migration; direct controller actions removed. Network delivery is a separate --udp-test.\r\n");return 0;}catch(Exception ex){File.WriteAllText(Path.Combine(folder,"self-test.txt"),ex.ToString());return 1;}}
         if(args.Length>0 && args[0]=="--udp-test") {try {Tests.UdpLoopback();File.WriteAllText(Path.Combine(folder,"udp-test.txt"),"PASS: 48-byte OpenTrack UDP packet sent and received over localhost.\r\n");return 0;}catch(Exception ex){File.WriteAllText(Path.Combine(folder,"udp-test.txt"),"FAILED: localhost UDP delivery test.\r\n"+ex);return 1;}}
         if(args.Length>0 && args[0]=="--probe") {try {var lines=new System.Collections.Generic.List<string>();foreach(var d in NativeHid.Enumerate()) {lines.Add(d.ToString()+" candidate="+NativeHid.Supported(d));lines.Add(d.Path);}if(lines.Count==0)lines.Add("No Valve HID interfaces visible to this process.");File.WriteAllLines(Path.Combine(folder,"diagnostics.txt"),lines.ToArray());return 0;}catch(Exception ex){File.WriteAllText(Path.Combine(folder,"diagnostics.txt"),ex.ToString());return 1;}}
         if(args.Length>0 && args[0]=="--ui-smoke") {Application.EnableVisualStyles();using(var form=new MainWindow()){form.Opacity=0;form.Show();Application.DoEvents();using(var bitmap=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(bitmap,new Rectangle(0,0,form.Width,form.Height));bitmap.Save(Path.Combine(folder,"ui-check.png"));}form.Close();}return 0;}

@@ -1,22 +1,15 @@
-# Gyro to UDP 0.3.0 — simpler interface, config-based bindings
+# Gyro to UDP — keyboard-only mapper preview
 
-- Window title simplified to **Gyro to UDP**.
-- Removed the **Controller motion → cockpit view** heading and the Nuclear Option/TrackIR reminder from the window.
-- Removed the keybind editor and controller remapping dropdown.
-- Configure keyboard and controller bindings in `settings.xml` with the app closed. Named shortcuts such as `F8`, `Ctrl+F9` and `Ctrl+Alt+K` are supported. Existing numeric keyboard settings still load.
-- Added `settings.example.xml` and a config reference in the README. Existing `settings.xml` files are not included or overwritten by the release package.
-- Removed key-capture code and its reflection-based tests. Modifier states are checked only while a configured key is held.
+Local test build from `feature/keyboard-only-mapper`. Not merged to main and not an official release.
 
-Defaults remain F8 (center), F9 (toggle pause), F10 (recalibrate), and R3 held (clutch).
+- Click **Keyboard shortcuts...** and then an action's current shortcut.
+- Capture prompt: **Press the keybind or Escape to cancel**.
+- Supports key combinations with Ctrl, Alt and Shift. Clear disables an action; Save applies and persists the dialog changes; Cancel leaves the previous bindings unchanged.
+- Includes Center view, Toggle pause, Recalibrate and Hold to pause. The hold shortcut starts disabled.
+- Direct controller-button bindings are removed. Use Steam Input to map a paddle to the matching keyboard key; for the hold action, keep the key pressed while holding the paddle.
+- Capture and mapping use focused window keyboard messages, without a global keyboard hook or reflection.
+- Existing keyboard settings remain compatible. Older controller-binding XML fields are ignored and removed when settings are saved.
 
-The controller reader, orientation integration and OpenTrack UDP format are unchanged. Copy your existing `settings.xml` beside the new EXE to keep your configuration, then restart the app after any manual edits.
+Close the previous version before testing. Extract the ZIP, optionally copy your existing settings.xml beside the EXE, and run SteamControllerGyroToUDP.exe. Main and its v0.3.0 release remain unchanged until this preview is tested and merged.
 
-This release has not been cleared by antivirus vendors; removing the editor is not a guarantee that detections will disappear. See SECURITY.md for the earlier scan and intended application behavior.
-
-## Quick start
-
-1. Extract the ZIP and run `SteamControllerGyroToUDP.exe`.
-2. Configure OpenTrack input as UDP over network on port 4242; select its appropriate game output.
-3. Start OpenTrack, start the bridge, and leave the controller still for two seconds to calibrate.
-
-Windows x64 and the **2026 Steam Controller** are supported. The original 2015 controller and other brands are not implemented. Gyro drift requires occasional recentering; no positional tracking is provided.
+No antivirus-clearance claim is made for this preview. Review SECURITY.md for the earlier scan history.

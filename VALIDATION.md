@@ -1,5 +1,14 @@
 # Validation — 12 November 2026
 
+## Keyboard-only development preview
+
+- Separate development branch; no merge or main-branch release.
+- Tests cover focused key capture, Escape cancellation, modifiers, Enter/Tab/Backspace capture, duplicate bindings, independent dialog working copies, keyboard clutch, settings round trips and migration of older XML.
+- Verified legacy direct controller mappings are not serialized and raw controller buttons no longer trigger pause/center/calibration.
+- No reflection-based keyboard tests or global keyboard hooks are used by the capture dialog.
+- Existing motion/packet, calibration and timestamp tests remain in place.
+- Live typing and Steam paddle-to-key behavior still require user testing.
+
 ## Version 0.3
 
 - Removed the keybind dialog, key-capture control, mapping dropdown and their reflection-based tests.

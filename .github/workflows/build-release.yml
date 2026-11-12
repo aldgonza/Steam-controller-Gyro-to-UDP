@@ -2,7 +2,7 @@ name: Build and community release
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/keyboard-only-mapper]
   pull_request:
   workflow_dispatch:
 
