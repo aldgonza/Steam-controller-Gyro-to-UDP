@@ -1,0 +1,15 @@
+# Generated output and personal settings
+*.exe
+*.pdb
+*.zip
+settings.xml
+diagnostics.txt
+self-test.txt
+udp-test.txt
+ui-check.png
+keybinds-ui-check.png
+build/
+dist/
+.vs/
+bin/
+obj/

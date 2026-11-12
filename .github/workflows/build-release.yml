@@ -1,0 +1,73 @@
+name: Build and community release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-2022
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Get-Content -LiteralPath VERSION -Raw).Trim()
+          if ($version -notmatch '^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$') { throw 'Invalid VERSION' }
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Compile, test and package
+        shell: pwsh
+        run: .\package.ps1
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-x64
+          path: |
+            dist/Steam-controller-Gyro-to-UDP-*-windows-x64.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: windows-x64
+          path: dist
+      - name: Create prerelease for a new version
+        shell: pwsh
+        run: |
+          $tag = 'v' + $env:RELEASE_VERSION
+          gh release view $tag --json tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Output "Release $tag exists; leaving its tag and assets unchanged. Bump VERSION for a new release."
+            exit 0
+          }
+          $zipPath = "dist/Steam-controller-Gyro-to-UDP-$($env:RELEASE_VERSION)-windows-x64.zip"
+          gh release create $tag $zipPath 'dist/SHA256SUMS.txt' --target $env:GITHUB_SHA --title "Steam controller Gyro to UDP $($env:RELEASE_VERSION)" --notes-file RELEASE_NOTES.md --prerelease
+          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed.' }
