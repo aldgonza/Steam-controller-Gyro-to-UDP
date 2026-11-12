@@ -16,8 +16,8 @@ The executable is unsigned. Some antivirus engines flagged the earlier local 0.2
 
 | Device / connection | Status |
 |---|---|
-| Steam Controller **2026**, USB or receiver | Implemented; user reports working |
-| Steam Controller 2026, Bluetooth | Report parser present; transport unverified |
+| Steam Controller **2026**, USB or receiver | Implemented; working |
+| Steam Controller 2026, Bluetooth | Report parser present; idk |
 | Original Steam Controller (2015) | Not implemented |
 | DualSense, DualShock 4, Switch Pro, other gyro pads | Not implemented |
 
