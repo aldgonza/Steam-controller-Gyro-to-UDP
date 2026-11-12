@@ -28,8 +28,8 @@ Requires Windows x64, .NET Framework 4.x (4.8 recommended), OpenTrack and a game
 ### 1. Configure OpenTrack
 
 1. Install [OpenTrack](https://github.com/opentrack/opentrack/releases).
-2. Select **Input → UDP over network**, port **4242**.
-3. Select **Output → freetrack 2.0 Enhanced** and enable its TrackIR interface. If available, choose **Use TrackIR, disable FreeTrack**.
+2. Select **Input > UDP over network**, port **4242**.
+3. Select **Output > freetrack 2.0 Enhanced** and enable its TrackIR interface. If available, choose **Use TrackIR, disable FreeTrack**.
 4. Start with linear 1:1 yaw/pitch mapping and no filter. Disable positional X/Y/Z mapping; leave roll disabled initially.
 5. Click **Start** in OpenTrack.
 
