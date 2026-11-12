@@ -41,27 +41,30 @@ public static class Tests {
         var packet=MotionEngine.Packet(new double[]{0,0,0,12.5,-8.25,0});Assert(packet.Length==48,"Packet length");Near(BitConverter.ToDouble(packet,24),12.5,0.00001,"OpenTrack yaw index");
         bool rejected=false;try{MotionEngine.Packet(new double[]{0,0,0,Double.NaN,0,0});}catch(ArgumentException){rejected=true;}Assert(rejected,"NaN sent");
         int combo=(int)(Keys.Control|Keys.Alt|Keys.K);
-        using(var capture=new KeyCapture()) {
-            var keyDown=typeof(KeyCapture).GetMethod("OnKeyDown",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
-            keyDown.Invoke(capture,new object[]{new KeyEventArgs((Keys)combo)});Assert(capture.Binding==combo,"Keyboard capture widget failed");
-            keyDown.Invoke(capture,new object[]{new KeyEventArgs(Keys.ControlKey)});Assert(capture.Binding==combo,"Modifier alone replaced binding");
-            keyDown.Invoke(capture,new object[]{new KeyEventArgs(Keys.Delete)});Assert(capture.Binding==0,"Clear binding failed");
-        }
         Assert(Hotkeys.Matches(combo,(int)Keys.K,true,true,false),"Modifier hotkey rejected");
         Assert(!Hotkeys.Matches(combo,(int)Keys.K,true,false,false),"Missing modifier accepted");
         Assert(!Hotkeys.Matches((int)Keys.F8,(int)Keys.F8,true,false,false),"Plain binding fired with extra Ctrl");
         Assert(!Hotkeys.Matches(0,0,false,false,false),"Disabled hotkey matched");
-        Assert(!Hotkeys.Distinct(new int[]{combo,0,combo}),"Duplicate accepted");Assert(Hotkeys.Distinct(new int[]{0,0,combo}),"Cleared bindings treated as duplicate");
-        var serializer=new XmlSerializer(typeof(Settings));var saved=new Settings{CenterKey=combo,CenterPad=2,CalibrateKey=0};string xml;
+        int parsed;
+        Assert(Hotkeys.TryParse("F8",out parsed)&&parsed==(int)Keys.F8,"Named key parsing");
+        Assert(Hotkeys.TryParse("Ctrl+Alt+K",out parsed)&&parsed==combo,"Modifier config parsing");
+        Assert(Hotkeys.TryParse("119",out parsed)&&parsed==(int)Keys.F8,"Legacy key parsing");
+        Assert(Hotkeys.TryParse("None",out parsed)&&parsed==0,"Disabled named binding");
+        Assert(Hotkeys.TryParse("0",out parsed)&&parsed==0,"Disabled legacy binding");
+        Assert(!Hotkeys.TryParse("NotARealKey",out parsed)&&parsed==0,"Invalid key accepted");
+        Assert(!Hotkeys.TryParse("Ctrl",out parsed),"Modifier-only key accepted");
+        Assert(!Hotkeys.TryParse("99999999",out parsed),"Invalid key bits accepted");
+        Assert(Hotkeys.Mask(2)==0x20000&&Hotkeys.Mask(99)==0,"Controller config index");
+        var serializer=new XmlSerializer(typeof(Settings));var saved=new Settings{CenterKey="Ctrl+Alt+K",CenterPad=2,CalibrateKey="None"};string xml;
         using(var writer=new StringWriter()){serializer.Serialize(writer,saved);xml=writer.ToString();}
-        using(var reader=new StringReader(xml)){var restored=(Settings)serializer.Deserialize(reader);Assert(restored.CenterKey==combo&&restored.CenterPad==2&&restored.CalibrateKey==0,"Binding persistence");}
-        using(var reader=new StringReader("<Settings><PauseButton>1</PauseButton></Settings>")){var old=(Settings)serializer.Deserialize(reader);Assert(old.CenterKey==(int)Keys.F8&&old.PauseKey==(int)Keys.F9&&old.CalibrateKey==(int)Keys.F10,"v0.1 defaults migration");}
+        using(var reader=new StringReader(xml)){var restored=(Settings)serializer.Deserialize(reader);Assert(restored.CenterKey=="Ctrl+Alt+K"&&restored.CenterPad==2&&restored.CalibrateKey=="None","Binding persistence");}
+        using(var reader=new StringReader("<Settings><PauseButton>1</PauseButton></Settings>")){var old=(Settings)serializer.Deserialize(reader);Assert(old.CenterKey=="F8"&&old.PauseKey=="F9"&&old.CalibrateKey=="F10","v0.1 defaults migration");}
+        using(var reader=new StringReader("<Settings><CenterKey>119</CenterKey><PauseKey>120</PauseKey><CalibrateKey>121</CalibrateKey><CenterPad>2</CenterPad></Settings>")){var old=(Settings)serializer.Deserialize(reader);Assert(Hotkeys.TryParse(old.CenterKey,out parsed)&&parsed==(int)Keys.F8&&old.CenterPad==2,"v0.2 numeric config migration");}
         var buttons=new MotionEngine{Calibrating=false,Ready=true,PauseMask=0,TogglePauseMask=0x80,RecenterMask=0x20000,CalibrateMask=0x40000};
         buttons.Update(new Sample{Tick=1000,TickBits=32,TickScale=0.000001,Buttons=0x80});Assert(buttons.Paused,"Controller toggle did not fire");
         buttons.Update(new Sample{Tick=5000,TickBits=32,TickScale=0.000001,Buttons=0x80});Assert(buttons.Paused,"Held toggle repeated");
         buttons.Update(new Sample{Tick=9000,TickBits=32,TickScale=0.000001});buttons.Update(new Sample{Tick=13000,TickBits=32,TickScale=0.000001,Buttons=0x80});Assert(!buttons.Paused,"Second toggle did not resume");
-        buttons.BindingActionsSuspended=true;buttons.Update(new Sample{Tick=17000,TickBits=32,TickScale=0.000001,Buttons=0x40000});Assert(!buttons.Calibrating,"Actions fired while editing bindings");
-        buttons.BindingActionsSuspended=false;buttons.Update(new Sample{Tick=21000,TickBits=32,TickScale=0.000001});buttons.Update(new Sample{Tick=25000,TickBits=32,TickScale=0.000001,Buttons=0x40000,Ay=1});Assert(buttons.Calibrating,"Controller calibrate did not fire");
+        buttons.Update(new Sample{Tick=17000,TickBits=32,TickScale=0.000001,Buttons=0x40000,Ay=1});Assert(buttons.Calibrating,"Controller calibrate did not fire");
     }
     public static void UdpLoopback() {
         var packet=MotionEngine.Packet(new double[]{0,0,0,12.5,-8.25,0});

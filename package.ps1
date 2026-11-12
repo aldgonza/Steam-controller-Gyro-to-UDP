@@ -9,7 +9,7 @@ $packageName = "Steam-controller-Gyro-to-UDP-$version"
 $stagePath = Join-Path $stageRoot $packageName
 $distPath = Join-Path $projectPath 'dist'
 New-Item -ItemType Directory -Path $stagePath, $distPath -Force | Out-Null
-$packageFiles = @('SteamControllerGyroToUDP.exe','NativeHid.cs','Motion.cs','Program.cs','Keybinds.cs','Tests.cs','build.ps1','package.ps1','VERSION','README.md','VALIDATION.md','LICENSE.txt','THIRD-PARTY-NOTICES.txt','SECURITY.md','CONTRIBUTING.md','RELEASE_NOTES.md')
+$packageFiles = @('SteamControllerGyroToUDP.exe','NativeHid.cs','Motion.cs','Program.cs','Hotkeys.cs','Tests.cs','build.ps1','package.ps1','VERSION','README.md','settings.example.xml','VALIDATION.md','LICENSE.txt','THIRD-PARTY-NOTICES.txt','SECURITY.md','CONTRIBUTING.md','RELEASE_NOTES.md')
 foreach ($packageFile in $packageFiles) {
     Copy-Item -LiteralPath (Join-Path $projectPath $packageFile) -Destination $stagePath
 }

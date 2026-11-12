@@ -1,4 +1,4 @@
-# Steam controller Gyro to UDP
+# Gyro to UDP
 
 Use a **2026 Steam Controller's gyro as cockpit head tracking** through [OpenTrack](https://github.com/opentrack/opentrack). Turn and tilt the controller to look around while keeping your regular flight controls in Steam Input.
 
@@ -61,9 +61,34 @@ The bridge uses the game's existing head-tracking interface. It does not hook Un
 | **F10** | Recalibrate sensor bias and center |
 | **Hold R3** | Pause while held; release to continue without a jump from the discarded motion |
 
-Click **Keybinds...** to change the keyboard shortcuts and optionally bind center, toggle pause or recalibration to R3 or a rear paddle (L4/L5/R4/R5). Click a keyboard box and press a key, optionally with Ctrl, Alt and/or Shift. Delete/Backspace clears it; Escape cancels the dialog. Bindings save when you click **Save**.
+Bindings are configured in **`settings.xml` beside the EXE**. Close the app before editing, then restart to load the changes. Run and close the app once to create this file, or copy `settings.example.xml` to `settings.xml` while the app is closed. The app has no key-capture editor or controller remapping dropdown.
 
-**Hold to pause** is configured in the main window. Each controller button can have one bridge action; duplicate assignments are rejected. Controller bindings use raw physical buttons, independent of Steam remapping. They keep their normal Steam/game actions, so choose unused buttons where possible.
+For example, inside the existing `<Settings>` element:
+
+```xml
+<CenterKey>F8</CenterKey>
+<PauseKey>Ctrl+F9</PauseKey>
+<CalibrateKey>F10</CalibrateKey>
+<PauseButton>1</PauseButton>
+<CenterPad>2</CenterPad>
+<TogglePausePad>0</TogglePausePad>
+<CalibratePad>0</CalibratePad>
+```
+
+`CenterKey`, `PauseKey` and `CalibrateKey` accept Windows key names such as `F8`, `F13` or `K`, optionally combined with `Ctrl`, `Alt` and/or `Shift` (for example `Ctrl+Alt+K`). Use `None` or `0` to disable a shortcut. Numeric keyboard values from previous versions remain supported. Invalid shortcuts are disabled; the window shows a notice when they are loaded. Malformed XML falls back to defaults and is preserved rather than overwritten.
+
+Controller fields use these values:
+
+| Value | Physical button |
+|---|---|
+| `0` | None |
+| `1` | R3 / right stick click |
+| `2` | L4 |
+| `3` | L5 |
+| `4` | R4 |
+| `5` | R5 |
+
+`PauseButton` is **hold to pause**; `CenterPad`, `TogglePausePad` and `CalibratePad` perform their named action on a button press. Choose different buttons/shortcuts for different actions to avoid conflicts. These are raw physical buttons, independent of Steam remapping; they keep their normal Steam/game actions.
 
 Keyboard shortcuts require the exact modifiers: Ctrl+F8 does not also trigger an F8 binding. The app polls the configured shortcuts while open; avoid conflicts with the game and OpenTrack. No keystrokes are recorded.
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Settings>
+  <Port>4242</Port>
+  <YawGain>1</YawGain>
+  <PitchGain>1</PitchGain>
+  <Roll>false</Roll>
+  <InvertYaw>false</InvertYaw>
+  <InvertPitch>false</InvertPitch>
+  <EnableSensor>true</EnableSensor>
+  <PauseButton>1</PauseButton>
+  <CenterKey>F8</CenterKey>
+  <PauseKey>F9</PauseKey>
+  <CalibrateKey>F10</CalibrateKey>
+  <CenterPad>0</CenterPad>
+  <TogglePausePad>0</TogglePausePad>
+  <CalibratePad>0</CalibratePad>
+</Settings>

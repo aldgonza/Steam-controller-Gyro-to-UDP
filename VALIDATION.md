@@ -1,5 +1,13 @@
 # Validation — 12 November 2026
 
+## Version 0.3
+
+- Removed the keybind dialog, key-capture control, mapping dropdown and their reflection-based tests.
+- Window title is Gyro to UDP; removed the in-window heading and Nuclear Option message.
+- Tests cover named key parsing, modifier combinations, disabled and invalid shortcuts, controller config indices, settings persistence, missing fields and migration from numeric 0.2 settings.
+- Motion/packet, calibration, timestamp rollover and controller action tests remain in place.
+- Keyboard polling and the .NET runtime remain; no antivirus-clearance claim is made for this release.
+
 ## Version 0.2
 
 - Keyboard binding capture, exact modifier matching, duplicate detection, and cleared bindings tested.

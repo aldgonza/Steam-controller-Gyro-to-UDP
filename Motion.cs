@@ -52,7 +52,7 @@ public struct Quaternion {
 public sealed class MotionEngine {
     public readonly object Gate=new object();
     public bool Paused, Calibrating=true, Ready; public uint PauseMask=0x20;
-    public uint RecenterMask,TogglePauseMask,CalibrateMask; public bool BindingActionsSuspended; uint previousButtons;
+    public uint RecenterMask,TogglePauseMask,CalibrateMask; uint previousButtons;
     public string CalibrationStatus="Waiting for motion; then keep controller still for 2 seconds.";
     public double BiasX,BiasY,BiasZ; public long SampleCount; public uint Buttons;
     public double LastSampleSeconds; public double Rate;
@@ -65,7 +65,7 @@ public sealed class MotionEngine {
     public void Update(Sample s) { lock(Gate) {
         Buttons=s.Buttons;
         uint pressed=s.Buttons&~previousButtons;previousButtons=s.Buttons;
-        if(!BindingActionsSuspended){if((pressed&RecenterMask)!=0)Recenter();if((pressed&TogglePauseMask)!=0)Paused=!Paused;if((pressed&CalibrateMask)!=0)Calibrate();}
+        if((pressed&RecenterMask)!=0)Recenter();if((pressed&TogglePauseMask)!=0)Paused=!Paused;if((pressed&CalibrateMask)!=0)Calibrate();
         if(haveTick && s.Tick==tick && s.TickBits==tickBits) return;
         double now=clock.Elapsed.TotalSeconds; LastSampleSeconds=now; SampleCount++; rateCount++;
         if(now-rateTime>=1) { Rate=rateCount/(now-rateTime); rateCount=0; rateTime=now; }
@@ -88,7 +88,7 @@ public sealed class MotionEngine {
             double variance=0; foreach(var a in calibration) variance+=(a.X-x)*(a.X-x)+(a.Y-y)*(a.Y-y)+(a.Z-z)*(a.Z-z);
             if(variance/calibration.Count>1.5) {calibration.Clear();calibrationTime=0;CalibrationStatus="Too much movement. Keep still and retrying.";return;}
             BiasX=x;BiasY=y;BiasZ=z;Calibrating=false;Ready=true;calibration.Clear();orientation=Quaternion.Identity;
-            CalibrationStatus="Calibrated. F8 = center; F9 = pause; F10 = recalibrate."; return;
+            CalibrationStatus="Calibrated. Use the configured shortcuts or on-screen buttons."; return;
         }
         if(Paused || (PauseMask!=0 && (s.Buttons&PauseMask)!=0)) return;
         orientation=(orientation*Quaternion.Increment(s.X-BiasX,s.Y-BiasY,s.Z-BiasZ,dt)).Normalized();

@@ -1,23 +1,22 @@
-# Steam controller Gyro to UDP 0.2.0 — community preview
+# Gyro to UDP 0.3.0 — simpler interface, config-based bindings
 
-Turn a 2026 Steam Controller's gyro into cockpit head tracking through OpenTrack. Originally built for Nuclear Option on Windows; the user reports a working live setup.
+- Window title simplified to **Gyro to UDP**.
+- Removed the **Controller motion → cockpit view** heading and the Nuclear Option/TrackIR reminder from the window.
+- Removed the keybind editor and controller remapping dropdown.
+- Configure keyboard and controller bindings in `settings.xml` with the app closed. Named shortcuts such as `F8`, `Ctrl+F9` and `Ctrl+Alt+K` are supported. Existing numeric keyboard settings still load.
+- Added `settings.example.xml` and a config reference in the README. Existing `settings.xml` files are not included or overwritten by the release package.
+- Removed key-capture code and its reflection-based tests. Modifier states are checked only while a configured key is held.
 
-Includes gyro calibration, yaw/pitch gain and inversion, optional roll, controller clutch, configurable keyboard/controller bindings and a simulated OpenTrack connection test.
+Defaults remain F8 (center), F9 (toggle pause), F10 (recalibrate), and R3 held (clutch).
+
+The controller reader, orientation integration and OpenTrack UDP format are unchanged. Copy your existing `settings.xml` beside the new EXE to keep your configuration, then restart the app after any manual edits.
+
+This release has not been cleared by antivirus vendors; removing the editor is not a guarantee that detections will disappear. See SECURITY.md for the earlier scan and intended application behavior.
 
 ## Quick start
 
 1. Extract the ZIP and run `SteamControllerGyroToUDP.exe`.
-2. Configure OpenTrack input as UDP over network, port 4242; output as freetrack 2.0 Enhanced with TrackIR enabled.
-3. Start tracking in OpenTrack, start the bridge, and keep the controller still for two seconds.
-4. Enable Nuclear Option's TrackIR cockpit camera input.
+2. Configure OpenTrack input as UDP over network on port 4242; select its appropriate game output.
+3. Start OpenTrack, start the bridge, and leave the controller still for two seconds to calibrate.
 
-The ZIP also includes the C# source and build script. No .NET SDK or NuGet packages are needed to build.
-
-## Scope
-
-- 2026 Steam Controller only; start with wired USB or its receiver.
-- Bluetooth transport is unverified. Original 2015 Steam Controller and other brands are not implemented.
-- Gyro integration can drift; use center/recalibrate as needed. No positional tracking.
-- Unsigned executable. An earlier local 0.2 build received four generic VirusTotal detections; vendor confirmation of a false positive has not been obtained. Read SECURITY.md and the repository's source/build logs before deciding to run it.
-
-This is an early prerelease, not an independently audited driver.
+Windows x64 and the **2026 Steam Controller** are supported. The original 2015 controller and other brands are not implemented. Gyro drift requires occasional recentering; no positional tracking is provided.
