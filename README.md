@@ -48,14 +48,7 @@ Requires Windows x64, .NET Framework 4.x (4.8 recommended), OpenTrack and a game
 
 Use **Invert yaw / Invert pitch** if needed. Start with gains at 1.0; increase either the bridge's gain or OpenTrack's mapping curve to taste.
 
-### 3. Enable Nuclear Option's cockpit tracking
-
-1. Start the bridge and OpenTrack before the game.
-2. In Nuclear Option's controls/settings, enable **Use TrackIR inputs for cockpit camera**.
-3. Enter an aircraft's cockpit view. Restart the game with tracking already active if it does not connect.
-
-The bridge uses the game's existing head-tracking interface. It does not hook Unity or use Gyro4All.
-
+The bridge uses the game's existing head-tracking interface.
 ## Controls and keybinds
 
 | Default | Action |
