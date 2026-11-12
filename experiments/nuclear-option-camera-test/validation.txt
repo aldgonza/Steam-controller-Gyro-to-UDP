@@ -1,0 +1,2 @@
+PASS: installed camera signature and fields; two pan clamp anchors; test injection at IL_04b0 before both smoothing reads; menu/TrackIR gates; LateUpdate caller; compiled plugin entry points. Live hook behavior remains untested.
+Game assembly SHA256: BABDD626BBAB5F01E6C244150C1E77C57C131EE86967214E2E5CED6D813C2BCE
