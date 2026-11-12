@@ -1,13 +1,15 @@
 # Validation — 12 November 2026
 
-## Keyboard-only development preview
+## Version 0.4.0
 
-- Separate development branch; no merge or main-branch release.
+- Developed and tested on a separate branch before user approval to promote to main.
 - Tests cover focused key capture, Escape cancellation, modifiers, Enter/Tab/Backspace capture, duplicate bindings, independent dialog working copies, keyboard clutch, settings round trips and migration of older XML.
 - Verified legacy direct controller mappings are not serialized and raw controller buttons no longer trigger pause/center/calibration.
 - No reflection-based keyboard tests or global keyboard hooks are used by the capture dialog.
 - Existing motion/packet, calibration and timestamp tests remain in place.
-- Live typing and Steam paddle-to-key behavior still require user testing.
+- User reports the final keyboard-only preview works flawlessly.
+- Punctuation label and settings round-trip tests pass; removed the Steam paddle hint from the dialog.
+- Release ZIP contents verified to exclude source, tests and build scripts.
 
 ## Version 0.3
 

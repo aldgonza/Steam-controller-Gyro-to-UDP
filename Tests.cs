@@ -48,6 +48,13 @@ public static class Tests {
         Assert(!Hotkeys.Matches((int)Keys.F8,(int)Keys.F8,true,false,false),"Plain binding fired with extra Ctrl");
         Assert(!Hotkeys.Matches(0,0,false,false,false),"Disabled hotkey matched");
         int parsed;
+        Assert(Hotkeys.Label((int)Keys.OemMinus)=="-","Minus display label");
+        Assert(Hotkeys.Label((int)(Keys.Control|Keys.OemMinus))=="Ctrl+-","Modified minus display label");
+        foreach(Keys punctuation in new[]{Keys.OemMinus,Keys.Oemplus,Keys.Oemcomma,Keys.OemPeriod,Keys.OemQuestion,Keys.OemSemicolon,Keys.OemQuotes,Keys.OemOpenBrackets,Keys.OemCloseBrackets,Keys.OemPipe,Keys.OemBackslash,Keys.Oemtilde}) {
+            int binding=(int)(Keys.Control|punctuation);
+            Assert(!Hotkeys.Label(binding).Contains("Oem"),"Technical punctuation label");
+            Assert(Hotkeys.TryParse(Hotkeys.ConfigName(binding),out parsed)&&parsed==binding,"Punctuation settings round trip");
+        }
         Assert(Hotkeys.TryParse("F8",out parsed)&&parsed==(int)Keys.F8,"Named key parsing");
         Assert(Hotkeys.TryParse("Ctrl+Alt+K",out parsed)&&parsed==combo,"Modifier config parsing");
         Assert(Hotkeys.TryParse("119",out parsed)&&parsed==(int)Keys.F8,"Legacy key parsing");

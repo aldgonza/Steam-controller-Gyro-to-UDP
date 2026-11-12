@@ -65,7 +65,7 @@ public sealed class KeyboardMapperDialog : Form {
     public KeyboardMapperDialog(int[] current) {
         if(current==null||current.Length!=4)throw new ArgumentException("Four shortcut bindings required.");
         bindings=(int[])current.Clone();
-        Text="Keyboard shortcuts";ClientSize=new Size(540,390);
+        Text="Keyboard shortcuts";ClientSize=new Size(540,320);
         FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;MinimizeBox=false;ShowInTaskbar=false;
         StartPosition=FormStartPosition.CenterParent;Font=new Font("Segoe UI",10);
         var intro=new Label {Text="Click a shortcut to choose a key. Clear disables that action."};
@@ -83,16 +83,14 @@ public sealed class KeyboardMapperDialog : Form {
             var clear=new Button {Text="Clear"};clear.SetBounds(425,y,95,34);
             clear.Click+=(s,e)=>{bindings[index]=0;RefreshLabels();};Controls.Add(clear);
         }
-        var steam=new Label {Text="In Steam Input, assign a paddle to the same keyboard key.\nFor Hold to pause, keep that key held while the paddle is held."};
-        steam.SetBounds(20,269,500,45);Controls.Add(steam);
-        var defaults=new Button {Text="Defaults"};defaults.SetBounds(20,338,115,32);
+        var defaults=new Button {Text="Defaults"};defaults.SetBounds(20,268,115,32);
         defaults.Click+=(s,e)=>{bindings[0]=(int)Keys.F8;bindings[1]=(int)Keys.F9;bindings[2]=(int)Keys.F10;bindings[3]=0;RefreshLabels();};Controls.Add(defaults);
-        var save=new Button {Text="Save"};save.SetBounds(285,338,110,32);
+        var save=new Button {Text="Save"};save.SetBounds(285,268,110,32);
         save.Click+=(s,e)=>{
             if(!KeyboardCapture.Distinct(bindings)){MessageBox.Show(this,"Choose different shortcuts for each action, or clear unused ones.","Duplicate shortcut");return;}
             DialogResult=DialogResult.OK;Close();
         };Controls.Add(save);
-        var cancel=new Button {Text="Cancel",DialogResult=DialogResult.Cancel};cancel.SetBounds(410,338,110,32);Controls.Add(cancel);CancelButton=cancel;
+        var cancel=new Button {Text="Cancel",DialogResult=DialogResult.Cancel};cancel.SetBounds(410,268,110,32);Controls.Add(cancel);CancelButton=cancel;
     }
     void RefreshLabels(){for(int i=0;i<4;i++)keyButtons[i].Text=Hotkeys.Label(bindings[i]);}
 }

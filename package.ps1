@@ -9,7 +9,9 @@ $packageName = "Steam-controller-Gyro-to-UDP-$version"
 $stagePath = Join-Path $stageRoot $packageName
 $distPath = Join-Path $projectPath 'dist'
 New-Item -ItemType Directory -Path $stagePath, $distPath -Force | Out-Null
-$packageFiles = @('SteamControllerGyroToUDP.exe','NativeHid.cs','Motion.cs','Program.cs','Hotkeys.cs','KeyboardMapper.cs','Tests.cs','build.ps1','package.ps1','VERSION','README.md','settings.example.xml','VALIDATION.md','LICENSE.txt','THIRD-PARTY-NOTICES.txt','SECURITY.md','CONTRIBUTING.md','RELEASE_NOTES.md')
+# Release downloads contain the runnable app and user documentation only.
+# Source code, tests and build scripts remain available in the repository.
+$packageFiles = @('SteamControllerGyroToUDP.exe','README.md','settings.example.xml','LICENSE.txt','THIRD-PARTY-NOTICES.txt','SECURITY.md','RELEASE_NOTES.md')
 foreach ($packageFile in $packageFiles) {
     Copy-Item -LiteralPath (Join-Path $projectPath $packageFile) -Destination $stagePath
 }

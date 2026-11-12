@@ -1,6 +1,6 @@
-# Gyro to UDP — keyboard-only mapper preview
+# Gyro to UDP 0.4.0
 
-Local test build from `feature/keyboard-only-mapper`. Not merged to main and not an official release.
+Keyboard-only shortcut mapping, tested successfully by the user before promotion to main.
 
 - Click **Keyboard shortcuts...** and then an action's current shortcut.
 - Capture prompt: **Press the keybind or Escape to cancel**.
@@ -10,6 +10,10 @@ Local test build from `feature/keyboard-only-mapper`. Not merged to main and not
 - Capture and mapping use focused window keyboard messages, without a global keyboard hook or reflection.
 - Existing keyboard settings remain compatible. Older controller-binding XML fields are ignored and removed when settings are saved.
 
-Close the previous version before testing. Extract the ZIP, optionally copy your existing settings.xml beside the EXE, and run SteamControllerGyroToUDP.exe. Main and its v0.3.0 release remain unchanged until this preview is tested and merged.
+Punctuation shortcuts show symbols such as `-` and `Ctrl+-` instead of Windows key names. The Steam paddle hint has been removed from the shortcut dialog.
 
-No antivirus-clearance claim is made for this preview. Review SECURITY.md for the earlier scan history.
+The release ZIP contains the EXE, settings example, documentation, licenses and checksum. Source code, tests and build scripts are available in the repository, rather than bundled in the ZIP.
+
+Close the previous version before upgrading. Extract the ZIP, optionally copy your existing settings.xml beside the EXE, and run SteamControllerGyroToUDP.exe.
+
+No antivirus-clearance claim is made for this release. Review SECURITY.md for the earlier scan history.

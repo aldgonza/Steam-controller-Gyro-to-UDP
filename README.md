@@ -1,6 +1,6 @@
 # Gyro to UDP
 
-**Development preview:** keyboard-only mapping, pending user testing before merge to main. The stable main branch remains v0.3.0.
+**Version 0.4.0:** configurable keyboard shortcuts with press-to-bind capture and Escape cancellation. The keyboard-only update has been tested successfully by the user.
 
 Use a **2026 Steam Controller's gyro as cockpit head tracking** through [OpenTrack](https://github.com/opentrack/opentrack). Turn and tilt the controller to look around while keeping your regular flight controls in Steam Input.
 
@@ -13,6 +13,8 @@ This is an early prototype developed with AI assistance. It needs no game DLLs, 
 ## Download
 
 Get the Windows x64 ZIP from [Releases](https://github.com/aldgonza/Steam-controller-Gyro-to-UDP/releases). Extract it into a writable folder and run `SteamControllerGyroToUDP.exe`. Keep `settings.xml` when upgrading to preserve your settings.
+
+The release ZIP contains the application, settings example, documentation, licenses and executable checksum. Source code, tests and build scripts are available by cloning the repository; they are not included in the release ZIP.
 
 The executable is unsigned. Some antivirus engines flagged the earlier local 0.2 build with generic detections. **See [SECURITY.md](SECURITY.md)** for the report, known hash, intended behavior and verification options. Vendor confirmation of a false positive has not been obtained.
 

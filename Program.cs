@@ -79,8 +79,8 @@ public sealed class MainWindow : Form {
                 if(dialog.ShowDialog(this)!=DialogResult.OK)return;
                 int[] chosen=dialog.Bindings;
                 string[] previous={settings.CenterKey,settings.PauseKey,settings.CalibrateKey,settings.HoldPauseKey};
-                settings.CenterKey=Hotkeys.Label(chosen[0]);settings.PauseKey=Hotkeys.Label(chosen[1]);
-                settings.CalibrateKey=Hotkeys.Label(chosen[2]);settings.HoldPauseKey=Hotkeys.Label(chosen[3]);
+                settings.CenterKey=Hotkeys.ConfigName(chosen[0]);settings.PauseKey=Hotkeys.ConfigName(chosen[1]);
+                settings.CalibrateKey=Hotkeys.ConfigName(chosen[2]);settings.HoldPauseKey=Hotkeys.ConfigName(chosen[3]);
                 if(!SaveSettings()) {
                     settings.CenterKey=previous[0];settings.PauseKey=previous[1];settings.CalibrateKey=previous[2];settings.HoldPauseKey=previous[3];
                     MessageBox.Show(this,"Could not save settings.xml. Check that the folder is writable and the existing XML is valid. Your previous shortcuts are still active.","Shortcuts not saved");return;

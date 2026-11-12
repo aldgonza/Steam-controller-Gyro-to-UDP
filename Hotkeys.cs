@@ -6,7 +6,27 @@ using System.Windows.Forms;
 namespace SteamGyroOpenTrack {
 public static class Hotkeys {
     [DllImport("user32.dll")] static extern short GetAsyncKeyState(int key);
-    public static string Label(int value) {return value==0?"None":new KeysConverter().ConvertToInvariantString((Keys)value);}
+    public static string ConfigName(int value) {return value==0?"None":new KeysConverter().ConvertToInvariantString((Keys)value);}
+    public static string Label(int value) {
+        string symbol;
+        switch((Keys)(value&0xffff)) {
+            case Keys.OemMinus:symbol="-";break;
+            case Keys.Oemplus:symbol="=";break;
+            case Keys.Oemcomma:symbol=",";break;
+            case Keys.OemPeriod:symbol=".";break;
+            case Keys.OemQuestion:symbol="/";break;
+            case Keys.OemSemicolon:symbol=";";break;
+            case Keys.OemQuotes:symbol="'";break;
+            case Keys.OemOpenBrackets:symbol="[";break;
+            case Keys.OemCloseBrackets:symbol="]";break;
+            case Keys.OemPipe:case Keys.OemBackslash:symbol="\\";break;
+            case Keys.Oemtilde:symbol="`";break;
+            default:return ConfigName(value);
+        }
+        return ((value&(int)Keys.Control)!=0?"Ctrl+":"")+
+            ((value&(int)Keys.Alt)!=0?"Alt+":"")+
+            ((value&(int)Keys.Shift)!=0?"Shift+":"")+symbol;
+    }
     public static bool TryParse(string text,out int value) {
         value=0;
         if(String.IsNullOrWhiteSpace(text)||String.Equals(text.Trim(),"None",StringComparison.OrdinalIgnoreCase))return true;

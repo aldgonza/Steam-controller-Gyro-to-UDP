@@ -1,6 +1,6 @@
 # Security and antivirus detections
 
-This is an unsigned, early Windows prototype. It was developed with AI assistance, includes its source, and is distributed without a security certification or independent audit.
+This is an unsigned, early Windows prototype. It was developed with AI assistance, has source available in the GitHub repository, and is distributed without a security certification or independent audit.
 
 ## Reported detections
 
